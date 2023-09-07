@@ -50,15 +50,15 @@
         } else {
             damage /= 100;
         }
-    
+        let ticks = Math.round(1 / damage);
         // Instant breaking
         if (damage > 1) {
             return 0;
+        } else {
+            ticks += 5;
         }
-    
-        let ticks = Math.round(1 / damage);
         let seconds = ticks / 20;
-    
+
         return seconds;
     }
   
