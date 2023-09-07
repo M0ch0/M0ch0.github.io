@@ -61,20 +61,6 @@
 
         return seconds;
     }
-    function updateFieldsFromToolTemplate(template) {
-        const toolMultipliers = {
-            none: 0,
-            wood: 1,
-            stone: 2,
-            iron: 6,
-            diamond: 8,
-            netherite: 9,
-            gold: 12
-        };
-    
-        const toolMultiplierInput = document.getElementById("toolMultiplier");
-        toolMultiplierInput.value = toolMultipliers[template];
-    }
 
     function updateFieldsFromToolTemplate(template) {
         const toolMultipliers = {
@@ -110,18 +96,6 @@
         }
     }
     
-    const toolTemplateSelect = document.getElementById("toolTemplate");
-    const hardnessTemplateSelect = document.getElementById("hardnessTemplate");
-    
-    toolTemplateSelect.addEventListener("change", function () {
-        const selectedToolTemplate = toolTemplateSelect.value;
-        updateFieldsFromToolTemplate(selectedToolTemplate);
-    });
-    
-    hardnessTemplateSelect.addEventListener("change", function () {
-        const selectedHardnessTemplate = hardnessTemplateSelect.value;
-        updateFieldsFromHardnessTemplate(selectedHardnessTemplate);
-    });
   
     function calculateAndDisplayMiningTime() {
         let isBestTool = document.getElementById("isBestTool").checked;
@@ -187,7 +161,6 @@
         document.getElementById("blockHardness").value = blockHardness;
     }
     
-    window.onload = loadInputFromCookie;
     
     function saveInputToCookie() {
         setCookie("miningSpeedCalc_isBestTool", document.getElementById("isBestTool").checked, 365);
@@ -204,9 +177,6 @@
         setCookie("miningSpeedCalc_onGround", document.getElementById("onGround").checked, 365);
         setCookie("miningSpeedCalc_blockHardness", document.getElementById("blockHardness").value, 365);
     }
-
-
-    document.addEventListener("change", saveInputToCookie);
         
     function setCookie(name, value, days) {
         var expires = "";
@@ -332,4 +302,21 @@
         </div>
     </div>
 </body>
+<footer>
+    <script>
+        window.onload = loadInputFromCookie;
+        const toolTemplateSelect = document.getElementById("toolTemplate");
+        const hardnessTemplateSelect = document.getElementById("hardnessTemplate");
+        document.addEventListener("change", saveInputToCookie);    
+        toolTemplateSelect.addEventListener("change", function () {
+            const selectedToolTemplate = toolTemplateSelect.value;
+            updateFieldsFromToolTemplate(selectedToolTemplate);
+        });
+        
+        hardnessTemplateSelect.addEventListener("change", function () {
+            const selectedHardnessTemplate = hardnessTemplateSelect.value;
+            updateFieldsFromHardnessTemplate(selectedHardnessTemplate);
+        });
+    </script>
+</footer>
 </html>
