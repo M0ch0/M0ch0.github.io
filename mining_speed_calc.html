@@ -61,6 +61,46 @@
 
         return seconds;
     }
+    function updateFieldsFromToolTemplate(template) {
+        const toolMultipliers = {
+            none: 0,
+            wood: 1,
+            stone: 2,
+            iron: 6,
+            diamond: 8,
+            netherite: 9,
+            gold: 12
+        };
+    
+        const toolMultiplierInput = document.getElementById("toolMultiplier");
+        toolMultiplierInput.value = toolMultipliers[template];
+    }
+
+    function updateFieldsFromHardnessTemplate(template) {
+        const hardnessValues = {
+            none: 0,
+            '1.5': 1.5,
+            '3': 3,
+            '4.5': 4.5,
+            '5': 5
+        };
+    
+        const blockHardnessInput = document.getElementById("blockHardness");
+        blockHardnessInput.value = hardnessValues[template];
+    }
+    
+    const toolTemplateSelect = document.getElementById("toolTemplate");
+    const hardnessTemplateSelect = document.getElementById("hardnessTemplate");
+    
+    toolTemplateSelect.addEventListener("change", function () {
+        const selectedToolTemplate = toolTemplateSelect.value;
+        updateFieldsFromToolTemplate(selectedToolTemplate);
+    });
+    
+    hardnessTemplateSelect.addEventListener("change", function () {
+        const selectedHardnessTemplate = hardnessTemplateSelect.value;
+        updateFieldsFromHardnessTemplate(selectedHardnessTemplate);
+    });
   
     function calculateAndDisplayMiningTime() {
         let isBestTool = document.getElementById("isBestTool").checked;
@@ -167,6 +207,8 @@
         }
         return null;
     }
+
+        
   </script>
 </head>
 <body>
@@ -182,7 +224,19 @@
                   <label for="toolMultiplier" class="form-label">Tool Multiplier</label>
                   <input type="number" id="toolMultiplier" step="0.01" value="1.0">
               </div>
-              
+
+              <div class="mb-3">
+                <label for="toolTemplate" class="form-label">Select Tool Template</label>
+                <select id="toolTemplate" class="form-select">
+                    <option value="none">None</option>
+                    <option value="wood">Wood (1)</option>
+                    <option value="stone">Stone (2)</option>
+                    <option value="iron">Iron (6)</option>
+                    <option value="diamond">Diamond (8)</option>
+                    <option value="netherite">Netherite (9)</option>
+                    <option value="gold">Gold (12)</option>
+                </select>
+            </div>
               <div class="mb-3">
                   <label for="canHarvest" class="form-label">Can Harvest</label>
                   <input type="checkbox" id="canHarvest">
@@ -237,6 +291,17 @@
                   <label for="blockHardness" class="form-label">Block Hardness</label>
                   <input type="number" id="blockHardness" step="0.01" value="1.0">
               </div>
+
+              <div class="mb-3">
+                <label for="hardnessTemplate" class="form-label">Select Hardness Template</label>
+                <select id="hardnessTemplate" class="form-select">
+                    <option value="none">None</option>
+                    <option value="1.5">1.5 (Common Blocks)</option>
+                    <option value="3">3 (Ores and Endstone)</option>
+                    <option value="4.5">4.5 (Deepslate Ores)</option>
+                    <option value="5">5 (Metal Blocks)</option>
+                </select>
+            </div>
             <button type="button" class="btn btn-primary" onclick="calculateAndDisplayMiningTime()">Calculate</button>
         </form>
 
