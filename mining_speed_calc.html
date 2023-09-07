@@ -95,6 +95,78 @@
     
         document.getElementById("result").textContent = "Mining Time: " + miningTime + " seconds";
     }
+
+    function loadInputFromCookie() {
+        let isBestTool = getCookie("miningSpeedCalc_isBestTool") === "true";
+        let toolMultiplier = parseFloat(getCookie("miningSpeedCalc_toolMultiplier")) || 1.0;
+        let canHarvest = getCookie("miningSpeedCalc_canHarvest") === "true";
+        let toolEfficiency = getCookie("miningSpeedCalc_toolEfficiency") === "true";
+        let efficiencyLevel = parseInt(getCookie("miningSpeedCalc_efficiencyLevel")) || 1;
+        let hasteEffect = getCookie("miningSpeedCalc_hasteEffect") === "true";
+        let hasteLevel = parseInt(getCookie("miningSpeedCalc_hasteLevel")) || 1;
+        let miningFatigue = getCookie("miningSpeedCalc_miningFatigue") === "true";
+        let miningFatigueLevel = parseInt(getCookie("miningSpeedCalc_miningFatigueLevel")) || 1;
+        let inWater = getCookie("miningSpeedCalc_inWater") === "true";
+        let hasAquaAffinity = getCookie("miningSpeedCalc_hasAquaAffinity") === "true";
+        let onGround = getCookie("miningSpeedCalc_onGround") === "true";
+        let blockHardness = parseFloat(getCookie("miningSpeedCalc_blockHardness")) || 1.0;
+    
+        document.getElementById("isBestTool").checked = isBestTool;
+        document.getElementById("toolMultiplier").value = toolMultiplier;
+        document.getElementById("canHarvest").checked = canHarvest;
+        document.getElementById("toolEfficiency").checked = toolEfficiency;
+        document.getElementById("efficiencyLevel").value = efficiencyLevel;
+        document.getElementById("hasteEffect").checked = hasteEffect;
+        document.getElementById("hasteLevel").value = hasteLevel;
+        document.getElementById("miningFatigue").checked = miningFatigue;
+        document.getElementById("miningFatigueLevel").value = miningFatigueLevel;
+        document.getElementById("inWater").checked = inWater;
+        document.getElementById("hasAquaAffinity").checked = hasAquaAffinity;
+        document.getElementById("onGround").checked = onGround;
+        document.getElementById("blockHardness").value = blockHardness;
+    }
+    
+    window.onload = loadInputFromCookie;
+    
+    function saveInputToCookie() {
+        setCookie("miningSpeedCalc_isBestTool", document.getElementById("isBestTool").checked, 365);
+        setCookie("miningSpeedCalc_toolMultiplier", document.getElementById("toolMultiplier").value, 365);
+        setCookie("miningSpeedCalc_canHarvest", document.getElementById("canHarvest").checked, 365);
+        setCookie("miningSpeedCalc_toolEfficiency", document.getElementById("toolEfficiency").checked, 365);
+        setCookie("miningSpeedCalc_efficiencyLevel", document.getElementById("efficiencyLevel").value, 365);
+        setCookie("miningSpeedCalc_hasteEffect", document.getElementById("hasteEffect").checked, 365);
+        setCookie("miningSpeedCalc_hasteLevel", document.getElementById("hasteLevel").value, 365);
+        setCookie("miningSpeedCalc_miningFatigue", document.getElementById("miningFatigue").checked, 365);
+        setCookie("miningSpeedCalc_miningFatigueLevel", document.getElementById("miningFatigueLevel").value, 365);
+        setCookie("miningSpeedCalc_inWater", document.getElementById("inWater").checked, 365);
+        setCookie("miningSpeedCalc_hasAquaAffinity", document.getElementById("hasAquaAffinity").checked, 365);
+        setCookie("miningSpeedCalc_onGround", document.getElementById("onGround").checked, 365);
+        setCookie("miningSpeedCalc_blockHardness", document.getElementById("blockHardness").value, 365);
+    }
+
+
+    document.addEventListener("change", saveInputToCookie);
+        
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+    
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
   </script>
 </head>
 <body>
