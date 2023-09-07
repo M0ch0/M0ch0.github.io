@@ -76,6 +76,24 @@
         toolMultiplierInput.value = toolMultipliers[template];
     }
 
+    function updateFieldsFromToolTemplate(template) {
+        const toolMultipliers = {
+            none: 0,
+            wood: 1,
+            stone: 2,
+            iron: 6,
+            diamond: 8,
+            netherite: 9,
+            gold: 12
+        };
+    
+        const toolMultiplierInput = document.getElementById("toolMultiplier");
+        
+        if (template !== "none") {
+            toolMultiplierInput.value = toolMultipliers[template];
+        }
+    }
+
     function updateFieldsFromHardnessTemplate(template) {
         const hardnessValues = {
             none: 0,
@@ -86,7 +104,10 @@
         };
     
         const blockHardnessInput = document.getElementById("blockHardness");
-        blockHardnessInput.value = hardnessValues[template];
+        
+        if (template !== "none") {
+            blockHardnessInput.value = hardnessValues[template];
+        }
     }
     
     const toolTemplateSelect = document.getElementById("toolTemplate");
@@ -226,7 +247,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="toolTemplate" class="form-label">Select Tool Template</label>
+                <label for="toolTemplate" class="form-label">Tool Templates</label>
                 <select id="toolTemplate" class="form-select">
                     <option value="none">None</option>
                     <option value="wood">Wood (1)</option>
@@ -293,7 +314,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="hardnessTemplate" class="form-label">Select Hardness Template</label>
+                <label for="hardnessTemplate" class="form-label">Hardness Templates</label>
                 <select id="hardnessTemplate" class="form-select">
                     <option value="none">None</option>
                     <option value="1.5">1.5 (Stone, Pumpkin, Melon, Andesite, Diorite, Granite, Blackstone)</option>
