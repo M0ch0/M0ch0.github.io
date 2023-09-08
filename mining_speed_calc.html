@@ -6,6 +6,7 @@
     <title>Minecraft Mining Speed Calculator</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script>
+
       function calculateMiningTime(
         isBestTool,
         toolMultiplier,
@@ -22,13 +23,17 @@
         blockHardness
       ) {
         let speedMultiplier = isBestTool ? toolMultiplier : 1;
-    
-        if (canHarvest && toolEfficiency) {
-            speedMultiplier += Math.pow(efficiencyLevel, 2) + 1;
+        if(isBestTool) {
+            speedMultiplier = toolMultiplier
+            if(!canHarvest){
+                speedMultiplier = 1
+            }
+            if (toolEfficiency) {
+                speedMultiplier += (Math.pow(efficiencyLevel, 2) + 1);
+            }
         }
-    
         if (hasteEffect) {
-            speedMultiplier *= 0.2 * hasteLevel + 1;
+            speedMultiplier *= ((0.2 * hasteLevel) + 1);
         }
     
         if (miningFatigue) {
@@ -42,23 +47,28 @@
         if (!onGround) {
             speedMultiplier /= 5;
         }
+
+        console.log(speedMultiplier);  
     
         let damage = speedMultiplier / blockHardness;
-    
+
+        console.log(damage);
         if (canHarvest) {
             damage /= 30;
         } else {
             damage /= 100;
         }
         let ticks = Math.round(1 / damage);
+        console.log(ticks);
         // Instant breaking
         if (damage > 1) {
             return 0;
         } else {
             ticks += 5;
         }
+        console.log(ticks);
         let seconds = ticks / 20;
-
+        console.log(seconds);
         return seconds;
     }
 
@@ -198,8 +208,6 @@
         }
         return null;
     }
-
-        
   </script>
 </head>
 <body>
