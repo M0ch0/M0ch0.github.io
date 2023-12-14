@@ -13,7 +13,32 @@ $('#editorBox').on('input', function () {
 $(document).ready(function () {
     const editor = ace.edit("editorBox")
     const Json5Mode = ace.require("ace/mode/json5").Mode;
+
     editor.getSession().setMode(new Json5Mode());
+    restoreState(editor);
+
+    window.onbeforeunload = function () {
+        saveState(editor);
+    };
+
+    setInterval(function () {
+        saveState(editor);
+    }, 300000);
+
+    editor.commands.addCommand({
+        name: 'pasteSpecial',
+        bindKey: {win: 'Ctrl-V', mac: 'Command-V'},
+        exec: function (editor) {
+            navigator.clipboard.readText().then(text => {
+                if (text.startsWith('/') && text.includes('{')) {
+                    const modifiedText = text.substring(text.indexOf('{'));
+                    editor.insert(modifiedText);
+                } else {
+                    editor.insert(text);
+                }
+            });
+        }
+    });
 
     $('#formatBtn').click(function () {
         const value = editor.getSession().getValue();
@@ -99,4 +124,16 @@ function setTheme(editor, theme) {
         editor.setTheme('ace/theme/chrome');
     }
     localStorage.setItem('theme', theme);
+}
+
+function saveState(editor) {
+    const content = editor.getSession().getValue();
+    localStorage.setItem('editorContent', content);
+}
+
+function restoreState(editor) {
+    const content = localStorage.getItem('editorContent');
+    if (content) {
+        editor.getSession().setValue(content);
+    }
 }
