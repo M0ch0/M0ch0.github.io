@@ -78,7 +78,9 @@ class SpecialJsonParser {
     }
 
     parseKey() {
-        const match = /[^:]+:/.exec(this.text.substring(this.cursor));
+        const match = this.text[this.cursor] === '"' || this.text[this.cursor] === '\''
+            ? /"([^"]+)":|'([^']+)':/.exec(this.text.substring(this.cursor))
+            : /[^:]+:/.exec(this.text.substring(this.cursor));
         if (!match) {
             throw new Error("Invalid JSON: Invalid Format Error");
         }
@@ -101,22 +103,23 @@ class SpecialJsonParser {
             if (!match) {
                 throw new Error("Invalid JSON: value not found");
             }
-            let value = match[0].trim();
+            let value = this.cursor;
             this.cursor += match[0].length;
-            // UUIDの特殊形式の処理
-            if (value.startsWith("I;") && !value.startsWith("\"I;")) {
-                value = value.replace("I;", "I; ");
+            if (this.text[value] === '"' || this.text[value] === '\'') {
+                return this.text.substring(value, this.cursor);
             }
-            return value;
+            return match[0].trim();
         }
     }
 
     parseString(quoteType) {
         let endQuoteIndex = this.cursor + 1;
+        let isEscaped = false;
         while (endQuoteIndex < this.text.length) {
-            if (this.text[endQuoteIndex] === quoteType && this.text[endQuoteIndex - 1] !== '\\') {
+            if (this.text[endQuoteIndex] === quoteType && !isEscaped) {
                 break;
             }
+            isEscaped = this.text[endQuoteIndex] === '\\' && !isEscaped;
             endQuoteIndex++;
         }
         if (endQuoteIndex >= this.text.length) {

@@ -62,7 +62,13 @@ $(document).ready(function () {
 
     $('#copyWithoutSpaceBtn').click(function () {
         const value = editor.getSession().getValue();
-        const textWithoutSpaces = value.replace(/[\n\s]/g, '');
+        const textWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => {
+            if (group) {
+                return group;
+            } else {
+                return '';
+            }
+        });
         const textArea = document.createElement("textarea");
         textArea.id = "copyArea"
         textArea.value = textWithoutSpaces;
@@ -71,7 +77,6 @@ $(document).ready(function () {
         textArea.focus();
         document.execCommand('copy');
         document.body.removeChild(textArea);
-
     });
 
 
