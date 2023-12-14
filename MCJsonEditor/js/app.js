@@ -16,13 +16,23 @@ $(document).ready(function () {
     editor.getSession().setMode(new Json5Mode());
 
     $('#formatBtn').click(function () {
-        console.log(editor.getSession().getValue())
-        const parser = new SpecialJsonParser(editor.getSession().getValue());
+        const value = editor.getSession().getValue();
+        console.log(value)
+        const parser = new SpecialJsonParser(value);
         const result = parser.parse();
-        const formattedJson = customStringify(result.data, 2);
-        editor.getSession().setValue(formattedJson)
+        const formattedJson = customStringify(result.data, 1);
+        if(formattedJson == null || formattedJson == undefined){
+            displayErrors(result.errors, value);
+            return;
+        }
+        const lines = formattedJson.split('\n'); // 文字列を行に分割
+        const lastLine = lines[lines.length - 1];
+        const trimmedLastLine = lastLine.trim();
+        lines[lines.length - 1] = trimmedLastLine;
+        const modifiedJson = lines.join('\n');
 
-        displayErrors(result.errors, formattedJson);
+        editor.getSession().setValue(modifiedJson)
+        displayErrors(result.errors, modifiedJson);
     });
 
     $('#copyWithoutSpaceBtn').click(function () {

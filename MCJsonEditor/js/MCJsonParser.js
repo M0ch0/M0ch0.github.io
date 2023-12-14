@@ -35,6 +35,10 @@ class SpecialJsonParser {
         } catch (e) {
             this.result.addError(e.message, this.cursor);
         }
+        if (this.cursor < this.text.length) {
+            this.result.addError("Invalid JSON: unexpected end of input", this.cursor);
+        }
+
         return this.result;
     }
 
@@ -76,7 +80,7 @@ class SpecialJsonParser {
     parseKey() {
         const match = /[^:]+:/.exec(this.text.substring(this.cursor));
         if (!match) {
-            throw new Error("Invalid JSON: key not found");
+            throw new Error("Invalid JSON: Invalid Format Error");
         }
         const key = match[0].slice(0, -1).trim();
         this.cursor += match[0].length;
@@ -127,6 +131,9 @@ class SpecialJsonParser {
 
 
 function customStringify(obj, indentLevel = 0) {
+    if (obj === null || obj === undefined) {
+        return null;
+    }
     const indent = '  '.repeat(indentLevel);
     const childIndent = '  '.repeat(indentLevel + 1);
 
