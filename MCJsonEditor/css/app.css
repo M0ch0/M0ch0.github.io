@@ -1,0 +1,25 @@
+body {
+    overflow: hidden;
+}
+
+#editorBox {
+    border: 1px solid lightgray;
+    height: 70vh;
+    width: 96vw;
+    font-size: 150%;
+}
+
+.dark-theme {
+    background-color: #232323;
+    color: #E2E2E2;
+}
+
+.dark-theme .navbar-custom {
+    background-color: #141414;
+    color: #000000 ;
+}
+
+.light-theme .navbar-custom {
+    background-color: #232323;
+    color: #FFFFFF;
+}
