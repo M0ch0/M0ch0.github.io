@@ -1,10 +1,10 @@
-このプロジェクトは、BSD 3-Clauseライセンスの条件の下で提供されているコードを含んでいます。
+このプロジェクトは、BSDライセンスの条件の下で提供されているコードを含んでいます。
 
-以下は、使用されているBSD 3-Clauseライセンスのコード (Ace Editor)の著作権表示です：
+以下は、使用されているBSDライセンスのコード (Ace Editor)の著作権表示です：
 
 Copyright (c) 2010, Ajax.org B.V.
 
-オリジナルのコードは以下から入手可能です：https://github.com/ajaxorg/ace/tree/master
+オリジナルのコードは以下から入手可能です：https://github.com/ajaxorg/ace/
 
 
 このプロジェクトの他の部分は、M0ch0によってライセンスされています。
