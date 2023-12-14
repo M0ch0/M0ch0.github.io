@@ -6,11 +6,11 @@ class ParseResult {
     }
 
     addError(error, index) {
-        this.errors.push({ error, index });
+        this.errors.push({error, index});
     }
 
     addBlock(start, end) {
-        this.blocks.push({ start, end });
+        this.blocks.push({start, end});
     }
 
     setData(data) {
@@ -88,41 +88,40 @@ class SpecialJsonParser {
             return this.parseObject();
         } else if (this.text[this.cursor] === '[') {
             return this.parseArray();
+        } else if (this.text[this.cursor] === '"') {
+            return this.parseString('"');
+        } else if (this.text[this.cursor] === '\'') {
+            return this.parseString('\'');
         } else {
-            let value;
-            if (this.text[this.cursor] === '"') {
-
-                let endQuoteIndex = this.cursor + 1;
-                while (endQuoteIndex < this.text.length) {
-                    if (this.text[endQuoteIndex] === '"' && this.text[endQuoteIndex - 1] !== '\\') {
-                        break;
-                    }
-                    endQuoteIndex++;
-                }
-                if (endQuoteIndex >= this.text.length) {
-                    throw new Error("Invalid JSON: unclosed string");
-                }
-                value = this.text.substring(this.cursor, endQuoteIndex + 1);
-                this.cursor = endQuoteIndex + 1;
-            } else {
-
-                const match = /[^,}\]]+/.exec(this.text.substring(this.cursor));
-                if (!match) {
-                    throw new Error("Invalid JSON: value not found");
-                }
-                value = match[0].trim();
-                this.cursor += match[0].length;
-
-                // UUIDの特殊形式の処理
-                if (value.startsWith("I;") && !value.startsWith("\"I;")) {
-                    value = value.replace("I;", "I; ");
-                }
-
+            const match = /[^,}\]]+/.exec(this.text.substring(this.cursor));
+            if (!match) {
+                throw new Error("Invalid JSON: value not found");
+            }
+            let value = match[0].trim();
+            this.cursor += match[0].length;
+            // UUIDの特殊形式の処理
+            if (value.startsWith("I;") && !value.startsWith("\"I;")) {
+                value = value.replace("I;", "I; ");
             }
             return value;
         }
     }
 
+    parseString(quoteType) {
+        let endQuoteIndex = this.cursor + 1;
+        while (endQuoteIndex < this.text.length) {
+            if (this.text[endQuoteIndex] === quoteType && this.text[endQuoteIndex - 1] !== '\\') {
+                break;
+            }
+            endQuoteIndex++;
+        }
+        if (endQuoteIndex >= this.text.length) {
+            throw new Error("Invalid JSON: unclosed string");
+        }
+        const str = this.text.substring(this.cursor, endQuoteIndex + 1);
+        this.cursor = endQuoteIndex + 1;
+        return str;
+    }
 
 }
 

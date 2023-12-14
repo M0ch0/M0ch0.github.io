@@ -1,7 +1,7 @@
 let history = [];
 let currentHistoryIndex = -1;
 
-$('#editorBox').on('input', function() {
+$('#editorBox').on('input', function () {
     if (currentHistoryIndex !== history.length - 1) {
         history = history.slice(0, currentHistoryIndex + 1);
     }
@@ -10,11 +10,12 @@ $('#editorBox').on('input', function() {
     currentHistoryIndex++;
 });
 
-$(document).ready(function() {
+$(document).ready(function () {
     const editor = ace.edit("editorBox")
     const Json5Mode = ace.require("ace/mode/json5").Mode;
     editor.getSession().setMode(new Json5Mode());
-    $('#formatBtn').click(function() {
+
+    $('#formatBtn').click(function () {
         console.log(editor.getSession().getValue())
         const parser = new SpecialJsonParser(editor.getSession().getValue());
         const result = parser.parse();
@@ -24,10 +25,25 @@ $(document).ready(function() {
         displayErrors(result.errors, formattedJson);
     });
 
+    $('#copyWithoutSpaceBtn').click(function () {
+        const value = editor.getSession().getValue();
+        const textWithoutSpaces = value.replace(/[\n\s]/g, '');
+        const textArea = document.createElement("textarea");
+        textArea.id = "copyArea"
+        textArea.value = textWithoutSpaces;
+        document.body.appendChild(textArea);
+        textArea.select();
+        textArea.focus();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+    });
+
+
     const currentTheme = localStorage.getItem('theme') || 'light';
     setTheme(editor, currentTheme);
 
-    $('#themeToggle').change(function() {
+    $('#themeToggle').change(function () {
         if (this.checked) {
             setTheme(editor, 'dark');
         } else {
