@@ -43,7 +43,15 @@ $(document).ready(function () {
     $('#formatBtn').click(function () {
         const value = editor.getSession().getValue();
         console.log(value)
-        const parser = new SpecialJsonParser(value);
+
+        const valueWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => {
+            if (group) {
+                return group;
+            } else {
+                return '';
+            }
+        });
+        const parser = new SpecialJsonParser(valueWithoutSpaces);
         const result = parser.parse();
         const formattedJson = customStringify(result.data, 1);
         if(formattedJson == null || formattedJson == undefined){

@@ -20,12 +20,13 @@ class ParseResult {
 
 class SpecialJsonParser {
     constructor(text) {
-        this.text = text.replace(/\s+/g, '');
+        this.text = text;
         this.cursor = 0;
         this.result = new ParseResult();
     }
 
     parse() {
+        this.skipWhitespace();
         try {
             if (this.text[this.cursor] === '{') {
                 this.result.setData(this.parseObject());
@@ -43,6 +44,7 @@ class SpecialJsonParser {
     }
 
     parseObject() {
+        this.skipWhitespace();
         const obj = {};
         const start = this.cursor;
         this.cursor++;
@@ -61,6 +63,7 @@ class SpecialJsonParser {
     }
 
     parseArray() {
+        this.skipWhitespace();
         const array = [];
         const start = this.cursor;
         this.cursor++;
@@ -78,6 +81,7 @@ class SpecialJsonParser {
     }
 
     parseKey() {
+        this.skipWhitespace();
         const match = this.text[this.cursor] === '"' || this.text[this.cursor] === '\''
             ? /"([^"]+)":|'([^']+)':/.exec(this.text.substring(this.cursor))
             : /[^:]+:/.exec(this.text.substring(this.cursor));
@@ -90,6 +94,7 @@ class SpecialJsonParser {
     }
 
     parseValue() {
+        this.skipWhitespace();
         if (this.text[this.cursor] === '{') {
             return this.parseObject();
         } else if (this.text[this.cursor] === '[') {
@@ -129,6 +134,13 @@ class SpecialJsonParser {
         this.cursor = endQuoteIndex + 1;
         return str;
     }
+
+    skipWhitespace() {
+        while (this.cursor < this.text.length && /\s/.test(this.text[this.cursor])) {
+            this.cursor++;
+        }
+    }
+
 
 }
 
