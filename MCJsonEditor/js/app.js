@@ -42,6 +42,7 @@ $(document).ready(function () {
     });
 
     $('#formatBtn').click(function () {
+        clearErrors();
         const value = editor.getSession().getValue();
         console.log(value)
 
