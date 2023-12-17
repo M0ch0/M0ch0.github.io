@@ -1,5 +1,6 @@
 let history = [];
 let currentHistoryIndex = -1;
+let isNormalJsonMode = false;
 
 $('#editorBox').on('input', function () {
     if (currentHistoryIndex !== history.length - 1) {
@@ -44,28 +45,39 @@ $(document).ready(function () {
         const value = editor.getSession().getValue();
         console.log(value)
 
-        const valueWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => {
-            if (group) {
-                return group;
-            } else {
-                return '';
+        if (isNormalJsonMode) {
+            try {
+                const parsedJson = JSON.parse(value);
+                const formattedJson = JSON.stringify(parsedJson, null, 4);
+                editor.getSession().setValue(formattedJson);
+            } catch (e) {
+                displayErrors([{error: e.message}], value);
             }
-        });
-        const parser = new SpecialJsonParser(valueWithoutSpaces);
-        const result = parser.parse();
-        const formattedJson = customStringify(result.data, 1);
-        if(formattedJson == null || formattedJson == undefined){
-            displayErrors(result.errors, value);
-            return;
-        }
-        const lines = formattedJson.split('\n'); // 文字列を行に分割
-        const lastLine = lines[lines.length - 1];
-        const trimmedLastLine = lastLine.trim();
-        lines[lines.length - 1] = trimmedLastLine;
-        const modifiedJson = lines.join('\n');
+        } else {
 
-        editor.getSession().setValue(modifiedJson)
-        displayErrors(result.errors, modifiedJson);
+            const valueWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => {
+                if (group) {
+                    return group;
+                } else {
+                    return '';
+                }
+            });
+            const parser = new SpecialJsonParser(valueWithoutSpaces);
+            const result = parser.parse();
+            const formattedJson = customStringify(result.data, 1);
+            if (formattedJson == null || formattedJson == undefined) {
+                displayErrors(result.errors, value);
+                return;
+            }
+            const lines = formattedJson.split('\n'); // 文字列を行に分割
+            const lastLine = lines[lines.length - 1];
+            const trimmedLastLine = lastLine.trim();
+            lines[lines.length - 1] = trimmedLastLine;
+            const modifiedJson = lines.join('\n');
+
+            editor.getSession().setValue(modifiedJson)
+            displayErrors(result.errors, modifiedJson);
+        }
     });
 
     $('#copyWithoutSpaceBtn').click(function () {
@@ -85,6 +97,24 @@ $(document).ready(function () {
         textArea.focus();
         document.execCommand('copy');
         document.body.removeChild(textArea);
+    });
+
+
+
+    if (isNormalJsonMode) {
+        $('#toggleJsonModeBtn').text('Switch to Special NBT-JSON Mode');
+    } else {
+        $('#toggleJsonModeBtn').text('Switch to Normal JSON Mode');
+    }
+
+
+    $('#toggleJsonModeBtn').click(function () {
+        isNormalJsonMode = !isNormalJsonMode;
+        if (isNormalJsonMode) {
+            $(this).text('Switch to Special NBT-JSON Mode');
+        } else {
+            $(this).text('Switch to Normal JSON Mode');
+        }
     });
 
 
@@ -114,6 +144,11 @@ function displayErrors(errors, inputText) {
             errorMessages.append(`<div class="alert alert-danger">Error at line ${errorLine} ( ${error.index} ): ${error.error}</div>`);
         });
     }
+}
+
+function clearErrors() {
+    const errorMessages = $('#errorMessages');
+    errorMessages.empty();
 }
 
 function getErrorLine(index, text) {
