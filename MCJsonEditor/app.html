@@ -44,9 +44,14 @@
         </nav>
         <div class="container ms-4">
             <h1>MC JSON Editor</h1>
-            <button id="formatBtn" class="btn btn-primary mt-2">Format JSON</button>
-            <button id="copyWithoutSpaceBtn" class="btn btn-primary mt-2">Copy without Spaces</button>
-            <button id="toggleJsonModeBtn" class="btn btn-secondary mt-2">Toggle JSON Mode</button>
+            <div class="d-flex align-items-center text-nowrap gap-1">
+                <button id="formatBtn" class="btn btn-primary mt-2">Format JSON</button>
+                <button id="copyWithoutSpaceBtn" class="btn btn-primary mt-2">Copy without Spaces</button>
+                <select id="jsonModeSelect" class="form-select mt-2 flex-nowrap w-auto">
+                    <option value="special">MC NBT-JSON</option>
+                    <option value="standard">Standard JSON</option>
+                </select>
+            </div>
             <span>
                 <pre id="editorBox" class="editorBox"></pre>
             </span>
@@ -57,7 +62,9 @@
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
             <script src="./js/ace.js" type="text/javascript" charset="utf-8"></script>
             <script src="./js/mode-json5.js" type="text/javascript" charset="utf-8"></script>
+            <script src="./js/ext-language_tools.js"></script>
             <script src="./js/MCJsonParser.js" type="text/javascript" charset="utf-8"></script>
+            <script src="./js/mcWords.js" type="text/javascript" charset="utf-8"></script>
             <script src="./js/app.js" type="text/javascript" charset="utf-8"></script>
         </footer>
     </body>

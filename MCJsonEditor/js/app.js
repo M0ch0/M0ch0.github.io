@@ -1,3 +1,5 @@
+
+
 let history = [];
 let currentHistoryIndex = -1;
 let isNormalJsonMode = false;
@@ -13,6 +15,7 @@ $('#editorBox').on('input', function () {
 
 $(document).ready(function () {
     const editor = ace.edit("editorBox")
+    const langTools = ace.require("ace/ext/language_tools");
     const Json5Mode = ace.require("ace/mode/json5").Mode;
 
     editor.getSession().setMode(new Json5Mode());
@@ -41,12 +44,45 @@ $(document).ready(function () {
         }
     });
 
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
+    });
+
+    /*
+
+    いつか現在の階層に応じてコンプリーションを分ける (EntityTag隷下なのかEnchantments隷下なのかみたいな感じで) ようにしたうえで実装する。
+    現在のままだと対象が多すぎて分かりづらいかも
+    nbtCompleter = {
+        getCompletions: (editor, session, pos, prefix, callback) => {
+            if (prefix.length === 0) {
+                callback(null, []);
+                return
+            }
+            callback(null, wordList.map(function(ea) {
+                return {
+                    name: ea.word,
+                    value: ea.word,
+                    meta: ""
+                };
+            }))
+        }
+    };
+
+    editor.completers.push(nbtCompleter);
+     */
+
+
+
+
     $('#formatBtn').click(function () {
         clearErrors();
         const value = editor.getSession().getValue();
         console.log(value)
 
-        if (isNormalJsonMode) {
+
+        let jsonMode = $('#jsonModeSelect').val();
+        if (jsonMode === 'standard') {
             try {
                 const parsedJson = JSON.parse(value);
                 const formattedJson = JSON.stringify(parsedJson, null, 4);
@@ -100,22 +136,7 @@ $(document).ready(function () {
         document.body.removeChild(textArea);
     });
 
-
-
-    if (isNormalJsonMode) {
-        $('#toggleJsonModeBtn').text('Switch to Special NBT-JSON Mode');
-    } else {
-        $('#toggleJsonModeBtn').text('Switch to Normal JSON Mode');
-    }
-
-
-    $('#toggleJsonModeBtn').click(function () {
-        isNormalJsonMode = !isNormalJsonMode;
-        if (isNormalJsonMode) {
-            $(this).text('Switch to Special NBT-JSON Mode');
-        } else {
-            $(this).text('Switch to Normal JSON Mode');
-        }
+    $('#jsonModeSelect').change(function() {
     });
 
 
