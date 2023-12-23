@@ -23,6 +23,7 @@ class SpecialJsonParser {
         this.text = text;
         this.cursor = 0;
         this.result = new ParseResult();
+        this.keyPathStack = [];
     }
 
     parse() {
@@ -39,81 +40,79 @@ class SpecialJsonParser {
         if (this.cursor < this.text.length) {
             this.result.addError("Invalid JSON: unexpected end of input", this.cursor);
         }
-
         return this.result;
     }
 
     parseObject() {
         this.skipWhitespace();
         const obj = {};
-        const start = this.cursor;
-        this.cursor++;
+        this.cursor++; // Skip '{'
         while (this.text[this.cursor] !== '}') {
+            this.skipWhitespace();
             const key = this.parseKey();
+            this.skipWhitespace();
+            if (this.text[this.cursor] !== ':') {
+                throw new Error("Invalid JSON: Expected ':' after key");
+            }
+            this.cursor++; // Skip ':'
+            this.skipWhitespace();
             const value = this.parseValue();
             obj[key] = value;
+            this.skipWhitespace();
             if (this.text[this.cursor] === ',') {
-                this.cursor++;
+                this.cursor++; // Skip ','
+            } else if (this.text[this.cursor] !== '}') {
+                throw new Error("Invalid JSON: Expected ',' or '}'");
             }
         }
-        const end = this.cursor;
-        this.cursor++;
-        this.result.addBlock(start, end);
+        this.cursor++; // Skip '}'
         return obj;
     }
 
     parseArray() {
         this.skipWhitespace();
         const array = [];
-        const start = this.cursor;
-        this.cursor++;
+        this.cursor++; // Skip '['
         while (this.text[this.cursor] !== ']') {
+            this.skipWhitespace();
             const value = this.parseValue();
             array.push(value);
+            this.skipWhitespace();
             if (this.text[this.cursor] === ',') {
-                this.cursor++;
+                this.cursor++; // Skip ','
+            } else if (this.text[this.cursor] !== ']') {
+                throw new Error("Invalid JSON: Expected ',' or ']'");
             }
         }
-        const end = this.cursor;
-        this.cursor++;
-        this.result.addBlock(start, end);
+        this.cursor++; // Skip ']'
         return array;
     }
 
     parseKey() {
-        this.skipWhitespace();
-        const match = this.text[this.cursor] === '"' || this.text[this.cursor] === '\''
-            ? /"([^"]+)":|'([^']+)':/.exec(this.text.substring(this.cursor))
-            : /[^:]+:/.exec(this.text.substring(this.cursor));
-        if (!match) {
-            throw new Error("Invalid JSON: Invalid Format Error");
+        if (this.text[this.cursor] === '"' || this.text[this.cursor] === '\'') {
+            return this.parseString(this.text[this.cursor]);
+        } else {
+            const match = /[^:,{}\[\]]+/.exec(this.text.substring(this.cursor));
+            if (!match) {
+                throw new Error("Invalid JSON: Invalid key format");
+            }
+            const key = match[0].trim();
+            this.cursor += match[0].length;
+            return key;
         }
-        const key = match[0].slice(0, -1).trim();
-        this.cursor += match[0].length;
-        return key;
     }
 
     parseValue() {
-        this.skipWhitespace();
-        if (this.text[this.cursor] === '{') {
-            return this.parseObject();
-        } else if (this.text[this.cursor] === '[') {
-            return this.parseArray();
-        } else if (this.text[this.cursor] === '"') {
-            return this.parseString('"');
-        } else if (this.text[this.cursor] === '\'') {
-            return this.parseString('\'');
-        } else {
-            const match = /[^,}\]]+/.exec(this.text.substring(this.cursor));
-            if (!match) {
-                throw new Error("Invalid JSON: value not found");
-            }
-            let value = this.cursor;
-            this.cursor += match[0].length;
-            if (this.text[value] === '"' || this.text[value] === '\'') {
-                return this.text.substring(value, this.cursor);
-            }
-            return match[0].trim();
+        switch (this.text[this.cursor]) {
+            case '{':
+                return this.parseObject();
+            case '[':
+                return this.parseArray();
+            case '"':
+            case '\'':
+                return this.parseString(this.text[this.cursor]);
+            default:
+                return this.parsePrimitive();
         }
     }
 
@@ -135,15 +134,22 @@ class SpecialJsonParser {
         return str;
     }
 
+    parsePrimitive() {
+        const match = /[^,}\]]+/.exec(this.text.substring(this.cursor));
+        if (!match) {
+            throw new Error("Invalid JSON: value not found");
+        }
+        const value = match[0].trim();
+        this.cursor += match[0].length;
+        return value; // Treat as string to preserve format
+    }
+
     skipWhitespace() {
-        while (this.cursor < this.text.length && /\s/.test(this.text[this.cursor])) {
+        while (/\s/.test(this.text[this.cursor])) {
             this.cursor++;
         }
     }
-
-
 }
-
 
 function customStringify(obj, indentLevel = 0) {
     if (obj === null || obj === undefined) {

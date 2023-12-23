@@ -52,7 +52,7 @@ $(document).ready(function () {
     /*
 
     いつか現在の階層に応じてコンプリーションを分ける (EntityTag隷下なのかEnchantments隷下なのかみたいな感じで) ようにしたうえで実装する。
-    現在のままだと対象が多すぎて分かりづらいかも
+    現在のままだと対象が多すぎて分かりづらい
     nbtCompleter = {
         getCompletions: (editor, session, pos, prefix, callback) => {
             if (prefix.length === 0) {
