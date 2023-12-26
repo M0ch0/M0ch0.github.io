@@ -21,6 +21,10 @@ var JsonHighlightRules = function() {
                 token : "constant.numeric", // float
                 regex : "[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b"
             }, {
+                token: "constant.numeric",
+                regex: "/^-?\\d+(\\.\\d+)?[bflsd]?$/"
+
+            }, {
                 token : "constant.language.boolean",
                 regex : "(?:true|false)\\b"
             }, {
@@ -123,6 +127,10 @@ var Json5HighlightRules = function() {
     }, {
         token : "constant.numeric",
         regex : /[+-]?(?:Infinity|NaN)\b/
+    }, {
+        token: "constant.numeric",
+        regex: /^-?\d+(\.\d+)?[bflsd]?$/
+
     }];
 
     for (var key in this.$rules)

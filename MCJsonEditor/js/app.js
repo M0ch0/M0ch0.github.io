@@ -74,7 +74,6 @@ $(document).ready(function () {
 
 
 
-
     $('#formatBtn').click(function () {
         clearErrors();
         const value = editor.getSession().getValue();
@@ -88,10 +87,9 @@ $(document).ready(function () {
                 const formattedJson = JSON.stringify(parsedJson, null, 4);
                 editor.getSession().setValue(formattedJson);
             } catch (e) {
-                displayErrors([{error: e.message}], value);
+                displayErrors([{error: e.message, path: e.stack}], value);
             }
         } else {
-
             const valueWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => {
                 if (group) {
                     return group;
@@ -99,14 +97,17 @@ $(document).ready(function () {
                     return '';
                 }
             });
+
+
             const parser = new SpecialJsonParser(valueWithoutSpaces);
             const result = parser.parse();
             const formattedJson = customStringify(result.data, 1);
+            console.log(result.errors)
             if (formattedJson == null || formattedJson == undefined) {
                 displayErrors(result.errors, value);
                 return;
             }
-            const lines = formattedJson.split('\n'); // 文字列を行に分割
+            const lines = formattedJson.split('\n');
             const lastLine = lines[lines.length - 1];
             const trimmedLastLine = lastLine.trim();
             lines[lines.length - 1] = trimmedLastLine;
@@ -162,8 +163,7 @@ function displayErrors(errors, inputText) {
 
     if (errors.length > 0) {
         errors.forEach(error => {
-            const errorLine = getErrorLine(error.index, inputText);
-            errorMessages.append(`<div class="alert alert-danger">Error at line ${errorLine} ( ${error.index} ): ${error.error}</div>`);
+            errorMessages.append(`<div class="alert alert-danger">Error at ${error.path}: ${error.error}</div>`);
         });
     }
 }
