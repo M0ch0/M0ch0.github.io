@@ -161,24 +161,7 @@ class SpecialJsonParser {
         const value = match[0].trim();
         this.cursor += match[0].length;
 
-        if(value.startsWith('I;')){
-            const numberPart = value.substring(2);
-            if (/^-?\d+$/.test(numberPart)) {
-                return value;
-            } else {
-                throw new ParseError("Invalid JSON: incorrect UUID format", `${path}.${value}`);
-            }
-        }
-
-        if (/^-?\d+(\.\d+)?[bflsd]?$/.test(value)) {
-            return value;
-        } else if (!isNaN(parseFloat(value)) && isFinite(value)) {
-            return value;
-        } else {
-            throw new ParseError("Invalid JSON: incorrect number format (b, f, l, s, d, f) (This error is most often caused by forgetting a trailing comma.)", path);
-        }
-
-        // return value;
+        return value;
     }
 
     skipWhitespace() {
