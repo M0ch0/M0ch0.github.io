@@ -1,8 +1,10 @@
 let wordList = [
     {
-        "word": "Invulnerable"
+        "word": "Invulnerable",
+        "hierarchy": "EntityTag"
     },
     {
-        "word": "Invulnerable"
+        "word": "sharpness",
+        "hierarchy": "Enchantments"
     }
 ];

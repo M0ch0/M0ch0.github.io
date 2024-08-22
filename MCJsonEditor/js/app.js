@@ -1,159 +1,168 @@
-
-
-let history = [];
-let currentHistoryIndex = -1;
-let isNormalJsonMode = false;
-
-$('#editorBox').on('input', function () {
-    if (currentHistoryIndex !== history.length - 1) {
-        history = history.slice(0, currentHistoryIndex + 1);
+class Editor {
+    constructor() {
+        this.history = [];
+        this.currentHistoryIndex = -1;
+        this.editor = ace.edit("editorBox");
+        this.langTools = ace.require("ace/ext/language_tools");
+        this.Json5Mode = ace.require("ace/mode/json5").Mode;
+        this.init();
     }
 
-    history.push(this.value);
-    currentHistoryIndex++;
-});
+    init() {
+        this.editor.getSession().setMode(new this.Json5Mode());
+        this.restoreState();
 
-$(document).ready(function () {
-    const editor = ace.edit("editorBox")
-    const langTools = ace.require("ace/ext/language_tools");
-    const Json5Mode = ace.require("ace/mode/json5").Mode;
+        window.onbeforeunload = () => this.saveState();
+        setInterval(() => this.saveState(), 300000);
 
-    editor.getSession().setMode(new Json5Mode());
-    restoreState(editor);
-
-    window.onbeforeunload = function () {
-        saveState(editor);
-    };
-
-    setInterval(function () {
-        saveState(editor);
-    }, 300000);
-
-    editor.commands.addCommand({
-        name: 'pasteSpecial',
-        bindKey: {win: 'Ctrl-V', mac: 'Command-V'},
-        exec: function (editor) {
-            navigator.clipboard.readText().then(text => {
-                if (text.startsWith('/') && text.includes('{')) {
-                    const modifiedText = text.substring(text.indexOf('{'));
-                    editor.insert(modifiedText);
-                } else {
-                    editor.insert(text);
-                }
-            });
-        }
-    });
-
-    editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableLiveAutocompletion: true
-    });
-
-    /*
-
-    いつか現在の階層に応じてコンプリーションを分ける (EntityTag隷下なのかEnchantments隷下なのかみたいな感じで) ようにしたうえで実装する。
-    現在のままだと対象が多すぎて分かりづらい
-    nbtCompleter = {
-        getCompletions: (editor, session, pos, prefix, callback) => {
-            if (prefix.length === 0) {
-                callback(null, []);
-                return
+        this.editor.commands.addCommand({
+            name: 'pasteSpecial',
+            bindKey: { win: 'Ctrl-V', mac: 'Command-V' },
+            exec: (editor) => {
+                navigator.clipboard.readText().then(text => {
+                    if (text.startsWith('/') && text.includes('{')) {
+                        const modifiedText = text.substring(text.indexOf('{'));
+                        editor.insert(modifiedText);
+                    } else {
+                        editor.insert(text);
+                    }
+                });
             }
-            callback(null, wordList.map(function(ea) {
-                return {
-                    name: ea.word,
-                    value: ea.word,
-                    meta: ""
-                };
-            }))
-        }
-    };
+        });
 
-    editor.completers.push(nbtCompleter);
-     */
+        this.editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true
+        });
 
+        const nbtCompleter = {
+            getCompletions: (editor, session, pos, prefix, callback) => {
+                if (prefix.length === 0) {
+                    callback(null, []);
+                    return;
+                }
 
+                const completions = wordList
+                    .filter(item => item.word.startsWith(prefix))
+                    .map(item => ({
+                        name: item.word,
+                        value: item.word,
+                        meta: item.hierarchy
+                    }));
 
-    $('#formatBtn').click(function () {
+                callback(null, completions);
+            }
+        };
+
+        this.editor.completers.push(nbtCompleter);
+
+        $('#formatBtn').click(() => this.format());
+        $('#copyWithoutSpaceBtn').click(() => this.copyWithoutSpace());
+        $('#jsonModeSelect').change(() => this.changeJsonMode());
+        $('#themeToggle').change(() => this.toggleTheme());
+
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        this.setTheme(currentTheme);
+        $('#themeToggle').prop('checked', currentTheme === 'dark');
+    }
+
+    format() {
         clearErrors();
-        const value = editor.getSession().getValue();
-        console.log(value)
-
+        const value = this.editor.getSession().getValue();
 
         let jsonMode = $('#jsonModeSelect').val();
         if (jsonMode === 'standard') {
             try {
                 const parsedJson = JSON.parse(value);
                 const formattedJson = JSON.stringify(parsedJson, null, 4);
-                editor.getSession().setValue(formattedJson);
+                this.editor.getSession().setValue(formattedJson);
             } catch (e) {
-                displayErrors([{error: e.message, path: e.stack}], value);
+                displayErrors([{ error: e.message, path: e.stack }], value);
             }
         } else {
-            const valueWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => {
-                if (group) {
-                    return group;
-                } else {
-                    return '';
-                }
-            });
-
+            const valueWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => group || '');
 
             const parser = new SpecialJsonParser(valueWithoutSpaces);
             const result = parser.parse();
             const formattedJson = customStringify(result.data, 1);
-            console.log(result.errors)
+
             if (formattedJson == null || formattedJson == undefined) {
                 displayErrors(result.errors, value);
                 return;
             }
+
             const lines = formattedJson.split('\n');
-            const lastLine = lines[lines.length - 1];
-            const trimmedLastLine = lastLine.trim();
-            lines[lines.length - 1] = trimmedLastLine;
+            lines[lines.length - 1] = lines[lines.length - 1].trim();
             const modifiedJson = lines.join('\n');
 
-            editor.getSession().setValue(modifiedJson)
+            this.editor.getSession().setValue(modifiedJson);
             displayErrors(result.errors, modifiedJson);
         }
-    });
+    }
 
-    $('#copyWithoutSpaceBtn').click(function () {
-        const value = editor.getSession().getValue();
-        const textWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => {
-            if (group) {
-                return group;
-            } else {
-                return '';
-            }
-        });
+    copyWithoutSpace() {
+        const value = this.editor.getSession().getValue();
+        const textWithoutSpaces = value.replace(/("[^"]+"|'[^']+')|[\n\s]/g, (match, group) => group || '');
+
         const textArea = document.createElement("textarea");
-        textArea.id = "copyArea"
+        textArea.id = "copyArea";
         textArea.value = textWithoutSpaces;
         document.body.appendChild(textArea);
         textArea.select();
         textArea.focus();
         document.execCommand('copy');
         document.body.removeChild(textArea);
-    });
+    }
 
-    $('#jsonModeSelect').change(function() {
-    });
+    changeJsonMode() {
+        // Implement logic for changing JSON mode
+    }
 
+    toggleTheme() {
+        const newTheme = $('#themeToggle').is(':checked') ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    }
 
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    setTheme(editor, currentTheme);
-
-    $('#themeToggle').change(function () {
-        if (this.checked) {
-            setTheme(editor, 'dark');
+    setTheme(theme) {
+        const body = $('body');
+        const navbar = $('.navbar');
+        if (theme === 'dark') {
+            body.removeClass('light-theme').addClass('dark-theme');
+            navbar.addClass('navbar-custom navbar-light bg-light').removeClass('navbar-dark bg-dark');
+            this.editor.setTheme('ace/theme/twilight');
         } else {
-            setTheme(editor, 'light');
+            body.removeClass('dark-theme').addClass('light-theme');
+            navbar.addClass('navbar-custom').removeClass('navbar-light bg-light');
+            this.editor.setTheme('ace/theme/chrome');
         }
-    });
+        localStorage.setItem('theme', theme);
+    }
 
-    $('#themeToggle').prop('checked', currentTheme === 'dark');
+    saveState() {
+        const content = this.editor.getSession().getValue();
+        localStorage.setItem('editorContent', content);
+    }
 
+    restoreState() {
+        const content = localStorage.getItem('editorContent');
+        if (content) {
+            this.editor.getSession().setValue(content);
+        }
+    }
+
+    onInput() {
+        if (this.currentHistoryIndex !== this.history.length - 1) {
+            this.history = this.history.slice(0, this.currentHistoryIndex + 1);
+        }
+
+        this.history.push(this.editor.getValue());
+        this.currentHistoryIndex++;
+    }
+}
+
+$(document).ready(function () {
+    const editor = new Editor();
+    $('#editorBox').on('input', () => editor.onInput());
 });
 
 
@@ -178,32 +187,3 @@ function getErrorLine(index, text) {
     return upToError.split('\n').length;
 }
 
-function setTheme(editor, theme) {
-    const body = $('body');
-    const navbar = $('.navbar');
-    if (theme === 'dark') {
-        body.removeClass('light-theme').addClass('dark-theme');
-        navbar.addClass('navbar-custom navbar-light bg-light').removeClass('navbar-dark bg-dark');
-
-        editor.setTheme('ace/theme/twilight');
-    } else {
-        body.removeClass('dark-theme').addClass('light-theme');
-        navbar.addClass('navbar-custom').removeClass('navbar-light bg-light');
-
-
-        editor.setTheme('ace/theme/chrome');
-    }
-    localStorage.setItem('theme', theme);
-}
-
-function saveState(editor) {
-    const content = editor.getSession().getValue();
-    localStorage.setItem('editorContent', content);
-}
-
-function restoreState(editor) {
-    const content = localStorage.getItem('editorContent');
-    if (content) {
-        editor.getSession().setValue(content);
-    }
-}
