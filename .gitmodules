@@ -1,0 +1,3 @@
+[submodule "MinimalPortables"]
+	path = MinimalPortables
+	url = https://github.com/M0ch0/MinimalPortables.git
